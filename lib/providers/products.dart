@@ -62,9 +62,9 @@ class Products with ChangeNotifier {
     return _items.where((prodItem) => prodItem.isFavorite).toList();
   }
 
-  void addProduct(Product product){
+  Future<void> addProduct(Product product){
     final url = Uri.parse('https://shop-app-f3f7c-default-rtdb.firebaseio.com/products.json');
-    http.post(url,body: json.encode({
+    return http.post(url,body: json.encode({
       'title': product.title,
       'description': product.description,
       'price': product.price,
@@ -82,7 +82,10 @@ class Products with ChangeNotifier {
       _items.add(newProduct);
       //_items.insert(0, newProduct);//at the beginning
       notifyListeners();
+    }).catchError((error){
+      throw(error);
     });
+
 
   }
   void updateProducts(String id,Product newProduct){

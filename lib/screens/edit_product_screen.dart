@@ -17,6 +17,7 @@ class _EditProductScreenState extends State<EditProductScreen>{
   final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   var _isInit = true;
+  var _isLoading = false;
   var _initValues = {
     'title':'',
     'description':'',
@@ -78,14 +79,44 @@ class _EditProductScreenState extends State<EditProductScreen>{
       return;
     }
     _form.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
     if(_editedProduct.id != ''){
       Provider.of<Products>(context,listen: false).updateProducts(_editedProduct.id,_editedProduct);
+      setState(() {
+        _isLoading = false;
+      });
     }
     else{
-      Provider.of<Products>(context,listen: false).addProduct(_editedProduct);
+      Provider.of<Products>(context,listen: false).addProduct(_editedProduct)
+          .catchError((error){
+            return showDialog(
+                context: context,
+                builder: (ctx) =>
+                    AlertDialog(
+                      title: Text('An error occurred!'),
+                      content: Text('Something went wrong'),
+                      actions: [
+                        TextButton(
+                            onPressed: (){
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Okay')
+                        )
+                      ],
+                    )
+            );
+          })
+          .then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).pop();
+      });
     }
     //
-    Navigator.of(context).pop();
+
 
 
   }
@@ -101,7 +132,9 @@ class _EditProductScreenState extends State<EditProductScreen>{
           )
         ],
       ),
-      body: Padding(
+      body:_isLoading ? Center(
+        child: CircularProgressIndicator(),
+      ) :  Padding(
         padding: EdgeInsets.all(16),
         child: Form(
           key:_form,
