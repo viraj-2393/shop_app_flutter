@@ -28,7 +28,7 @@ class Product with ChangeNotifier{
       }));
       if(response.statusCode >= 400){
         isFavorite = oldStatus;
-        notifyListeners(); 
+        notifyListeners();
       }
     }
     catch(error){
