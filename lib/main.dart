@@ -12,7 +12,7 @@ import './screens/edit_product_screen.dart';
 import './screens/auth_screen.dart';
 import './providers/auth.dart';
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -26,15 +26,18 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (ctx) => Auth(),
           ),
-          ChangeNotifierProvider(
-            create: (ctx) => Products(),
-          ),
+
           ChangeNotifierProvider(
             create: (ctx) => Cart(),
           ),
           ChangeNotifierProvider(
               create: (ctx) => Orders()
-          )
+          ),
+          ChangeNotifierProxyProvider<Auth,Products>(
+            create: (_)=>Products(),
+            update: (ctx,auth,previous) => Products()
+            ..authToken = auth.token,
+          ),
         ],
       child: Consumer<Auth>(
         builder: (ctx,authData,_)=>MaterialApp(
