@@ -7,7 +7,7 @@ import '../screens/edit_product_screen.dart';
 class UserProductsScreen extends StatelessWidget{
   static const routeName = '/user-products';
   Future<void> _refreshProducts(BuildContext context) async{
-    await Provider.of<Products>(context,listen: false).fetchAndSetProducts();
+    await Provider.of<Products>(context,listen: false).fetchAndSetProducts(true);
   }
   @override
   Widget build(BuildContext context) {
@@ -25,24 +25,31 @@ class UserProductsScreen extends StatelessWidget{
         ],
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh:()=> _refreshProducts(context) ,
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemBuilder: (ctx,index)=>
-                Column(
-                  children: [
-                    UserProductItem(
-                        productData.items[index].id,
-                        productData.items[index].title,
-                        productData.items[index].imageUrl
-                    ),
-                    Divider()
-                  ],
-                )
-            ,
-            itemCount: productData.items.length ,
+      body: FutureBuilder(
+        future: _refreshProducts(context),
+        builder: (ctx,snapshot) => snapshot.connectionState == ConnectionState.waiting ?
+            const Center(child: CircularProgressIndicator(),)
+            : RefreshIndicator(
+          onRefresh:()=> _refreshProducts(context) ,
+          child: Consumer<Products>(
+            builder: (ctx,productData,_) =>Padding(
+              padding: const EdgeInsets.all(8),
+              child: ListView.builder(
+                itemBuilder: (ctx,index)=>
+                    Column(
+                      children: [
+                        UserProductItem(
+                            productData.items[index].id,
+                            productData.items[index].title,
+                            productData.items[index].imageUrl
+                        ),
+                        const Divider()
+                      ],
+                    )
+                ,
+                itemCount: productData.items.length ,
+              ),
+            ),
           ),
         ),
       )
